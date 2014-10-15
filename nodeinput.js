@@ -1,5 +1,22 @@
 $(function(){ // on dom ready
 
+jsontext = [];
+
+jQuery.ajax({
+                type: "POST",
+                url: 'http://mininet-vm/web/openflowproxy.php',
+                dataType: 'json',
+                data: {functionname: 'get_topo'},
+ 
+                success: function (obj, ts) {
+                        if (!('error' in obj)) {
+                                var result = obj.result;
+                                jsontext =  JSON.stringify(result));
+                        } else {
+                                console.log(obj.error);
+                        }
+                }
+        });
 
 //response
 var jsontext_old = [{"n_tables":254,"ports":[{"hw_addr":"6a:43:eb:72:f9:a6","name":"s1-eth1","port_no":1},{"hw_addr":"26:21:db:05:0c:3c","name":"s1-eth2","port_no":2},{"hw_addr":"ae:ab:37:17:08:4e","name":"s1","port_no":65534}],"dpid":"00-00-00-00-00-01"},
@@ -12,22 +29,32 @@ jsontext = {"switches":[{"dpid":"00-00-00-00-00-01"},{"dpid":"00-00-00-00-00-02"
 var nodes1 = [];
 var edges1 = [];
 
-//alert(objectLength(jsontext.switches));
 for (var i = 0; i < objectLength(jsontext.switches); i++) {
-  //alert(jsontext.switches[i].dpid);
-  //length of ports of each
-  nodes1 += { data: { id: jsontext.switches[i].dpid, name: jsontext.switches[i].dpid, weight: 65, faveColor: '#6FB1FC', faveShape: 'triangle' } }; 
+    nodes1.push({
+
+        data: {
+            id: jsontext.switches[i].dpid,
+            name:jsontext.switches[i].dpid,
+            weight: 65, 
+            faveColor: '#6FB1FC', 
+            faveShape: 'triangle'
+        }
+    });
 }
 
+
 for (var i = 0; i < objectLength(jsontext.links); i++) {
-  //length of ports of each
-  alert(jsontext.links[i][0]+' '+jsontext.links[i][1]);
-  edges1 += { data: { source: jsontext.links[i][0], target: jsontext.links[i][1], faveColor: '#6FB1FC', strength: 50 } };
+    edges1.push({
+        data: {
+            source: jsontext.links[i][0],
+            target: jsontext.links[i][1],
+            faveColor: '#6FB1FC',
+            strength: 50
+        }
+    })
 }
 
 //Genereate nodes
-
-
 function objectLength(obj) {
   var result = 0;
   for(var prop in obj) {
@@ -85,26 +112,8 @@ $('#cy').cytoscape({
       }),
   
   elements: {
-    nodes: [
-      { data: { id: 'j', name: 'Node 1', weight: 65, faveColor: '#6FB1FC', faveShape: 'triangle' } },
-      { data: { id: 'e', name: 'Node 2', weight: 45, faveColor: '#EDA1ED', faveShape: 'triangle' } },
-      { data: { id: 'k', name: 'Node 3', weight: 75, faveColor: '#86B342', faveShape: 'triangle' } },
-      { data: { id: 'g', name: 'node 4', weight: 70, faveColor: '#F5A45D', faveShape: 'triangle' } }
-    ],
-    edges: [
-      { data: { source: 'j', target: 'e', faveColor: '#6FB1FC', strength: 50 } },
-      { data: { source: 'j', target: 'k', faveColor: '#6FB1FC', strength: 50 } },
-      { data: { source: 'j', target: 'g', faveColor: '#6FB1FC', strength: 50 } },
-     
-      { data: { source: 'e', target: 'j', faveColor: '#EDA1ED', strength: 50 } },
-      { data: { source: 'e', target: 'k', faveColor: '#EDA1ED', strength: 50 }, classes: 'questionable' },
-      
-      { data: { source: 'k', target: 'j', faveColor: '#86B342', strength: 50 } },
-      { data: { source: 'k', target: 'e', faveColor: '#86B342', strength: 50 } },
-      { data: { source: 'k', target: 'g', faveColor: '#86B342', strength: 50 } },
-      
-      { data: { source: 'g', target: 'j', faveColor: '#F5A45D', strength: 50 } }
-    ]
+    nodes: nodes1,
+    edges: edges1   
   },
   
   ready: function(){
